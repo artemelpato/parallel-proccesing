@@ -19,56 +19,54 @@ struct particleData
 
 int main()
 {
+	const int  nCollisions = 100;
+	
 	particleData particle;
-
-	int nParticles = 0;
 
 	TFile *outFile = new TFile("output.root", "RECREATE");
 
 	TTree *tree = new TTree("tree", "Tree kek");
-	tree->Branch("Particles Data", &particle, "E:p_x:p_y:p_z:isPiMeson:nEvent");
+	tree->Branch("ParticlesData", &particle, "E/D:p_x/D:p_y/D:p_z/D:isPiMeson/I:nEvent/I");
 
 	Pythia pythia;
-	pythia.readString("Beams:eCM = 8000.");
+	pythia.readString("Beams:eCM = 1000.");
 	pythia.readString("HardQCD:all = on");
-	pythia.readString("PhaseSpace:pTHatMin = 20.");
+	pythia.readString("PhaseSpace:pTHatMin = 2.");
 
 	pythia.init();
 
-	for (int iEvent = 0; iEvent < 1; ++iEvent)
+	for (int iEvent = 0; iEvent < nCollisions; ++iEvent)
 	{
 		if (!pythia.next()) continue;
 
 		for (int i = 0; i < pythia.event.size(); ++i)
 		{
-	 		if (pythia.event[i].isFinal() && (pythia.event[i].id() == -211)) 
+	 		if (pythia.event[i].isFinal() == true && (pythia.event[i].id() == -211)) 
 			{
 				particle.E   = pythia.event[i].e();
 				particle.p_x = pythia.event[i].px();
 				particle.p_y = pythia.event[i].py();
 				particle.p_z = pythia.event[i].pz();
 				particle.isPiMeson = 1;
-				particle.nEvent = i;
+				particle.nEvent = iEvent;
 			}		
 
-	 		if (pythia.event[i].isFinal() && (pythia.event[i].id() == 2212)) 
+	 		if (pythia.event[i].isFinal() == true && (pythia.event[i].id() == 2212)) 
 			{
 				particle.E   = pythia.event[i].e();
 				particle.p_x = pythia.event[i].px();
 				particle.p_y = pythia.event[i].py();
 				particle.p_z = pythia.event[i].pz();
 				particle.isPiMeson = 0;
-				particle.nEvent = i;
+				particle.nEvent = iEvent;
 			}		
 
-			nParticles++;
 			tree->Fill();
 		}
 	}
 
 	tree->Write();
 	tree->Print();
-	tree->Delete();
 
 	outFile->Close();
 }
