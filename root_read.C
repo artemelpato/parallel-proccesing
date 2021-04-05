@@ -2,6 +2,7 @@
 #include <TFile.h>
 #include <vector>
 #include <cmath>
+#include <fstream>
 #include <TH1F.h>
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
@@ -18,12 +19,13 @@ struct particleData
 
 int root_read()
 {
-
-	const int nCollisions = 100;
+	int nCollisions;
+	ifstream nColFile("ncollisions.txt");
+	nColFile >> nCollisions;
 
 	TFile *inFile = new TFile("output.root", "UPDATE");
 	TTreeReader *treeReader = new TTreeReader("tree", inFile);
-	TH1F *massHisto = new TH1F("MassHisto", "Mass Distribution", 10000, 1, 1.2);
+	TH1F *massHisto = new TH1F("MassHisto", "Mass Distribution", 200, 1.154, 1.158);
 
 	TTreeReaderValue<double> readE  (*treeReader, "ParticlesData.E");
 	TTreeReaderValue<double> readpx (*treeReader, "ParticlesData.p_x");

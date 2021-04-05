@@ -4,6 +4,7 @@
 #include <TH1F.h> 
 #include <vector> 
 #include <cmath> 
+#include <fstream> 
 
 using namespace Pythia8;
 
@@ -19,7 +20,9 @@ struct particleData
 
 int main()
 {
-	const int  nCollisions = 100;
+	int  nCollisions;
+	ifstream nColFile("ncollisions.txt");
+	nColFile >> nCollisions;
 	
 	particleData particle;
 
@@ -29,9 +32,9 @@ int main()
 	tree->Branch("ParticlesData", &particle, "E/D:p_x/D:p_y/D:p_z/D:isPiMeson/I:nEvent/I");
 
 	Pythia pythia;
-	pythia.readString("Beams:eCM = 1000.");
+	pythia.readString("Beams:eCM = 8000.");
 	pythia.readString("HardQCD:all = on");
-	pythia.readString("PhaseSpace:pTHatMin = 2.");
+	pythia.readString("PhaseSpace:pTHatMin = 20.");
 
 	pythia.init();
 
