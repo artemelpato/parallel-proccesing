@@ -3,7 +3,7 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
-#include <TH1F.h>
+#include <TH1D.h>
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 
@@ -25,7 +25,7 @@ int root_read()
 
 	TFile *inFile = new TFile("output.root", "UPDATE");
 	TTreeReader *treeReader = new TTreeReader("tree", inFile);
-	TH1F *massHisto = new TH1F("MassHisto", "Mass Distribution", 200, 1.154, 1.158);
+	TH1D *massHisto = new TH1D("MassHisto", "Mass Distribution", 1000, 1, 2);
 
 	TTreeReaderValue<double> readE  (*treeReader, "ParticlesData.E");
 	TTreeReaderValue<double> readpx (*treeReader, "ParticlesData.p_x");
@@ -52,7 +52,7 @@ int root_read()
 
 				piMesonVec.push_back(readData);
 			}
-			else
+			else if (*readIsPi == 0)
 			{
 				readData.E   = *readE;
 				readData.p_x = *readpx;
@@ -72,7 +72,7 @@ int root_read()
 				massHisto->Fill( sqrt( (piMesonVec[im].E + protonVec[ip].E)*(piMesonVec[im].E + protonVec[ip].E)
 						       	- (piMesonVec[im].p_x + protonVec[ip].p_x)*(piMesonVec[im].p_x + protonVec[ip].p_x)
 						       	- (piMesonVec[im].p_y + protonVec[ip].p_y)*(piMesonVec[im].p_y + protonVec[ip].p_y)
-						       	- (piMesonVec[im].p_z + protonVec[ip].p_z)*(piMesonVec[ip].p_z + protonVec[ip].p_z) ) );
+						       	- (piMesonVec[im].p_z + protonVec[ip].p_z)*(piMesonVec[im].p_z + protonVec[ip].p_z) ) );
 		
 		piMesonVec.clear();
 		protonVec.clear();	
@@ -86,7 +86,6 @@ int root_read()
 	
 	return 0;
 }
-
 
 
 

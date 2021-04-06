@@ -44,7 +44,7 @@ int main()
 
 		for (int i = 0; i < pythia.event.size(); ++i)
 		{
-	 		if (pythia.event[i].isFinal() == true && (pythia.event[i].id() == -211)) 
+	 		if ((pythia.event[i].isFinal()) && (pythia.event[i].id() == -211)) 
 			{
 				particle.E   = pythia.event[i].e();
 				particle.p_x = pythia.event[i].px();
@@ -52,9 +52,10 @@ int main()
 				particle.p_z = pythia.event[i].pz();
 				particle.isPiMeson = 1;
 				particle.nEvent = iEvent;
+				tree->Fill();
 			}		
 
-	 		if (pythia.event[i].isFinal() == true && (pythia.event[i].id() == 2212)) 
+	 		if ((pythia.event[i].isFinal()) && (pythia.event[i].id() == 2212)) 
 			{
 				particle.E   = pythia.event[i].e();
 				particle.p_x = pythia.event[i].px();
@@ -62,9 +63,9 @@ int main()
 				particle.p_z = pythia.event[i].pz();
 				particle.isPiMeson = 0;
 				particle.nEvent = iEvent;
+				tree->Fill();
 			}		
 
-			tree->Fill();
 		}
 	}
 
