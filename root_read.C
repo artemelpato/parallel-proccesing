@@ -6,6 +6,7 @@
 #include <TH1D.h>
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
+#include <iostream>
 
 struct particleData 
 {
@@ -17,16 +18,23 @@ struct particleData
 	int    nEvent;
 };
 
-int root_read()
+int root_read(char* argv)
 {
-	int nCollisions;
-	ifstream nColFile("ncollisions.txt");
-	nColFile >> nCollisions;
+	std::cout << argv << std::endl;
+	
+	int iEvent = 0;
 
-	TFile *inFile = new TFile("output.root", "UPDATE");
+	TFile *inFile = new TFile(argv, "READ");
+	TFile *outFile = new TFile("finalHist.root", "UPDATE");
+	TH1D *massHisto = (TH1D*)outFile->Get("MassHisto");
+
+	if (massHisto == nullptr)
+		massHisto = new TH1D("MassHisto", "Mass Distribution", 1000, 1, 2);
+	
+	TH1D *newMassHisto = new TH1D("newMassHisto", "Mass Distribution", 1000, 1, 2);
+
 	TTreeReader *treeReader = new TTreeReader("tree", inFile);
-	TH1D *massHisto = new TH1D("MassHisto", "Mass Distribution", 1000, 1, 2);
-
+	
 	TTreeReaderValue<double> readE  (*treeReader, "ParticlesData.E");
 	TTreeReaderValue<double> readpx (*treeReader, "ParticlesData.p_x");
 	TTreeReaderValue<double> readpy (*treeReader, "ParticlesData.p_y");
@@ -38,51 +46,50 @@ int root_read()
 	particleData readData;
 
 	std::vector<particleData> piMesonVec, protonVec;
-	
-	for (int i = 0; i < nCollisions; i++)
+
+	while (treeReader->Next())
 	{
-		while (treeReader->Next())
+		if (*readIsPi == 1) 
 		{
-	 		if (*readIsPi == 1) 
-			{
-				readData.E   = *readE;
-				readData.p_x = *readpx;
-				readData.p_y = *readpy;
-				readData.p_z = *readpz;
+			readData.E   = *readE;
+			readData.p_x = *readpx;
+			readData.p_y = *readpy;
+			readData.p_z = *readpz;
 
-				piMesonVec.push_back(readData);
-			}
-			else if (*readIsPi == 0)
-			{
-				readData.E   = *readE;
-				readData.p_x = *readpx;
-				readData.p_y = *readpy;
-				readData.p_z = *readpz;
+			piMesonVec.push_back(readData);
+		}
+		else if (*readIsPi == 0)
+		{
+			readData.E   = *readE;
+			readData.p_x = *readpx;
+			readData.p_y = *readpy;
+			readData.p_z = *readpz;
 
-				protonVec.push_back(readData);
-			}
+			protonVec.push_back(readData);
+		}
 
-			if (*readnEvent != i)
-				break;
-
-		} 
-
-		for (int im = 0; im < piMesonVec.size(); im++)
-			for (int ip = 0; ip < protonVec.size(); ip++)
-				massHisto->Fill( sqrt( (piMesonVec[im].E + protonVec[ip].E)*(piMesonVec[im].E + protonVec[ip].E)
-						       	- (piMesonVec[im].p_x + protonVec[ip].p_x)*(piMesonVec[im].p_x + protonVec[ip].p_x)
-						       	- (piMesonVec[im].p_y + protonVec[ip].p_y)*(piMesonVec[im].p_y + protonVec[ip].p_y)
-						       	- (piMesonVec[im].p_z + protonVec[ip].p_z)*(piMesonVec[im].p_z + protonVec[ip].p_z) ) );
-		
-		piMesonVec.clear();
-		protonVec.clear();	
-
-	}
-		
-	massHisto->Write();	
-	inFile->Close();
+		if (*readnEvent != iEvent)
+		{
+			for (int im = 0; im < piMesonVec.size(); im++)
+				for (int ip = 0; ip < protonVec.size(); ip++)
+					massHisto->Fill( sqrt( (piMesonVec[im].E   + protonVec[ip].E  )*(piMesonVec[im].E   + protonVec[ip].E  )
+							     - (piMesonVec[im].p_x + protonVec[ip].p_x)*(piMesonVec[im].p_x + protonVec[ip].p_x)
+							     - (piMesonVec[im].p_y + protonVec[ip].p_y)*(piMesonVec[im].p_y + protonVec[ip].p_y)
+							     - (piMesonVec[im].p_z + protonVec[ip].p_z)*(piMesonVec[im].p_z + protonVec[ip].p_z) ) );
 	
-	new TBrowser;
+			piMesonVec.clear();
+			protonVec.clear();	
+			iEvent++;
+		}
+
+	} 
+
+			
+//	massHisto->Add(newMassHisto);	
+	massHisto->Write("", TObject::kOverwrite);	
+
+	inFile->Close();
+	outFile->Close();
 	
 	return 0;
 }
