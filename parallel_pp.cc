@@ -28,14 +28,14 @@ int main(int argc, char* argv[])
 	}
 
 	
-	std::string seed( argv[1] );
-	std::string nCollisions( argv[2] );
+	std::string nCollisions( argv[1] );
+	std::string seed       ( argv[2] );
 	std::string outfileName( argv[3] );
 
 	std::string pythiaSeedString("Random:seed = ");
 	pythiaSeedString.append( seed );
 
-	std::string rootFileName ("output/");
+	std::string rootFileName ("output_trees/");
 	rootFileName.append( outfileName );
 	rootFileName.append("_");
 	rootFileName.append( seed );

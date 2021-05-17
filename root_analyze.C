@@ -18,20 +18,16 @@ struct particleData
 	int    nEvent;
 };
 
-int root_read(char* argv)
+int root_analyze(std::string inFileName, std::string outFileName)
 {
-	std::cout << argv << std::endl;
+	std::cout << inFileName << std::endl;
 	
 	int iEvent = 0;
 
-	TFile *inFile = new TFile(argv, "READ");
-	TFile *outFile = new TFile("finalHist.root", "UPDATE");
-	TH1D *massHisto = (TH1D*)outFile->Get("MassHisto");
-
-	if (massHisto == nullptr)
-		massHisto = new TH1D("MassHisto", "Mass Distribution", 1000, 1, 2);
+	TFile *inFile  = new TFile(inFileName.c_str(), "READ");
+	TFile *outFile = new TFile(outFileName.c_str(), "RECREATE");
 	
-	TH1D *newMassHisto = new TH1D("newMassHisto", "Mass Distribution", 1000, 1, 2);
+	TH1D *massHisto = new TH1D("MassHisto", "#it{M_{#pi^{-} p^{+}}} Distribution", 5000, 0, 3);
 
 	TTreeReader *treeReader = new TTreeReader("tree", inFile);
 	
@@ -85,7 +81,6 @@ int root_read(char* argv)
 	} 
 
 			
-//	massHisto->Add(newMassHisto);	
 	massHisto->Write("", TObject::kOverwrite);	
 
 	inFile->Close();
